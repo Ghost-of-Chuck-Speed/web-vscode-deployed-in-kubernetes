@@ -101,9 +101,9 @@ fi
 
 
 
-##########
-### User Defined
-##########
+############################################################
+### User Defined ### User Defined
+############################################################
 alias cat='batcat'
 alias k='kubectl'
 alias kg='kubectl get'
@@ -126,6 +126,6 @@ export PS1="VSCode@Ubuntu:\w\$ "
 #         command cd "$@"
 #     fi
 # }
-git config --global user.name "1username"
-git config --global user.email "1email address"
+git config --global user.name ""
+git config --global user.email ""
 echo "Hello"
