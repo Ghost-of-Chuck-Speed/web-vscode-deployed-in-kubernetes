@@ -1,0 +1,110 @@
+authentik:
+  secret_key: "="
+  postgresql:
+    host: authentik-postgresql.code-dev.svc.cluster.local
+    port: 5432
+    password: ""
+  redis:
+    host: authentik-redis-master.code-dev.svc.cluster.local
+    password: ""
+postgresql:
+  auth:
+    password: ""
+
+redis:
+  auth:
+    enabled: true
+  password: ""
+
+  server:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+  worker:
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+
+  ingress:
+    enabled: false
+
+  service:
+    type: ClusterIP
+    port: 80
+
+server:
+  ingress:
+    enabled: false
+
+postgresql:
+  enabled: true
+  persistence:
+    enabled: true
+    size: 8Gi
+
+redis:
+  enabled: true
+  master:
+    persistence:
+      enabled: true
+      size: 8Gi
+      
+# resources:
+#   server:
+#     requests:
+#       cpu: 100m
+#       memory: 128Mi
+#   worker:
+#     requests:
+#       cpu: 100m
+#       memory: 128Mi
+
+# authentik:
+#   secret_key: "blah"
+#   postgresql:
+#     password: "blah"
+#   redis:
+#     password: "blah"
+# postgresql:
+#   auth:
+#     password: "blah"
+
+# redis:
+#   password: "blah"
+
+
+#   ingress:
+#     enabled: false
+
+#   service:
+#     type: ClusterIP
+#     port: 80
+
+# server:
+#   ingress:
+#     enabled: false
+
+# postgresql:
+#   enabled: true
+#   persistence:
+#     enabled: true
+#     size: 8Gi
+
+# redis:
+#   enabled: true
+#   master:
+#     persistence:
+#       enabled: true
+#       size: 8Gi
+      
+# resources:
+#   server:
+#     requests:
+#       cpu: 100m
+#       memory: 128Mi
+#   worker:
+#     requests:
+#       cpu: 100m
+#       memory: 128Mi
