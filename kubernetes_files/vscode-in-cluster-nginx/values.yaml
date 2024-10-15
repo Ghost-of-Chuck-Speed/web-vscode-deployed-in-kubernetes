@@ -1,0 +1,23 @@
+# values.yaml
+nginx:
+  domain: "coder.dev"
+
+developerCount: 1
+
+developerNames:
+  - chuck
+  # - bob
+  # - alice
+
+# Secrets for each developer
+developerSecrets:
+  - secret-chuck-tls
+  # - secret-alice-tls
+  # - secret-bob-tls
+
+individualStorageSize: 5Gi
+sharedStorageSize: 5Gi
+
+image:
+  repository: chuckspeed/vscode
+  tag: "1.0"

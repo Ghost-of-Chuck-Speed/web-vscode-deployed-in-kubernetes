@@ -1,0 +1,24 @@
+# values.yaml
+# minikube ip
+nginx:
+  domain: yourdomain.com  # Replace with your actual domain
+
+developerCount: 3  # Number of developers
+
+developerNames:
+  - chuck  # Name for developer 1
+  - alice  # Name for developer 2
+  - bob    # Name for developer 3
+
+# Secrets for each developer
+developerSecrets:
+  - secret-chuck-tls  # Secret for developer 1
+  - secret-alice-tls  # Secret for developer 2
+  - secret-bob-tls    # Secret for developer 3
+
+individualStorageSize: 5Gi  # Size for individual developer storage
+sharedStorageSize: 20Gi      # Size for shared storage
+
+image:
+  repository: your-repo/code-server  # Replace with your image repository
+  tag: latest  # Replace with your image tag

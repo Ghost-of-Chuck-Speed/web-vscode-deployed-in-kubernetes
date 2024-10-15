@@ -1,0 +1,109 @@
+# templates/all-resources.yaml
+
+---
+# NGINX Ingress Resource (only if using Ingress for SSL termination)
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: code-server-ingress
+  annotations:
+    nginx.ingress.kubernetes.io/ssl-redirect: "false"  # Set to false if using ALB
+    nginx.ingress.kubernetes.io/rewrite-target: /
+spec:
+  rules:
+    {{- range $i := until .Values.developerCount }}
+    - host: {{ printf "%s-%s.%s" .Values.nginx.domain .Values.developerNames[$i] .Values.nginx.domain }} 
+      http:
+        paths:
+          - path: /developer{{ add $i 1 }}
+            backend:   
+              service:
+                name: code-server-developer{{ add $i 1 }}
+                port:
+                  number: 8443
+    {{- end }}
+---
+# Persistent Volume for Shared Storage
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: shared-pv
+spec:
+  capacity:
+    storage: {{ .Values.sharedStorageSize }}  # Size for shared storage
+  accessModes:
+    - ReadWriteMany  # Allows multiple pods to read and write to this volume
+  hostPath:
+    path: /mnt/shared-storage  # Path on the host for shared storage
+---
+# Persistent Volume Claims for Developers
+{{- range $i := until .Values.developerCount }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: developer{{ add $i 1 }}-pvc
+spec:
+  accessModes:
+    - ReadWriteOnce  # Individual storage for each developer
+  resources:
+    requests:
+      storage: {{ .Values.individualStorageSize }}  # Size for individual developer storage
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: developer{{ add $i 1 }}-shared-pvc
+spec:
+  accessModes:
+    - ReadWriteMany  # Shared storage for all developers
+  resources:
+    requests:
+      storage: {{ .Values.sharedStorageSize }}  # Size for shared storage
+{{- end }}
+---
+# Deployments and Services for Each Developer
+{{- range $i := until .Values.developerCount }}
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: code-server-developer{{ add $i 1 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: code-server-developer{{ add $i 1 }}
+  template:
+    metadata:
+      labels:
+        app: code-server-developer{{ add $i 1 }}
+    spec:
+      containers:
+      - name: code-server
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        ports:
+        - containerPort: 8443
+        volumeMounts:
+        - mountPath: /path/to/developer-storage  # Path for developer's storage
+          name: developer-storage
+        - mountPath: /path/to/shared  # Path for shared storage
+          name: shared-storage
+      volumes:
+      - name: developer-storage
+        persistentVolumeClaim:
+          claimName: developer{{ add $i 1 }}-pvc
+      - name: shared-storage
+        persistentVolumeClaim:
+          claimName: developer{{ add $i 1 }}-shared-pvc
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: code-server-developer{{ add $i 1 }}
+spec:
+  type: ClusterIP
+  ports:
+    - port: 8443
+      targetPort: 8443
+  selector:
+    app: code-server-developer{{ add $i 1 }}
+{{- end }}

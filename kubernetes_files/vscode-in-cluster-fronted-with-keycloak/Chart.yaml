@@ -1,0 +1,4 @@
+apiVersion: v2
+name: code-server
+version: 0.1.0
+description: A Helm chart for linuxserver/code-server

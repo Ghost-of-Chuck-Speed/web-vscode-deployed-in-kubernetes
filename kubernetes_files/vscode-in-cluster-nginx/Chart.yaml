@@ -1,0 +1,6 @@
+# Chart.yaml
+apiVersion: v2
+name: my-dev-env
+description: A Helm chart for multiple developer environments using code-server and NGINX
+version: 0.1.0
+appVersion: "1.0"

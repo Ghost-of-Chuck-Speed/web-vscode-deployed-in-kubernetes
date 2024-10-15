@@ -1,0 +1,11 @@
+replicaCount: 1
+image:
+  repository: lscr.io/linuxserver/code-server
+  tag: latest
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 8443
+
+resources: {}
