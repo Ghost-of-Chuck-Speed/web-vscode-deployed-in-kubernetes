@@ -1,0 +1,10 @@
+{
+    "workbench.startupEditor": "welcomePage",
+    "workbench.preferredHighContrastLightColorTheme": "One Dark Pro",
+    "workbench.colorTheme": "One Dark Pro",
+    "git.autofetch": true,
+    "emmet.preferences": {},
+    "window.title": "[MACHINE NAME]",
+    "window.commandCenter": false
+  }
+  
