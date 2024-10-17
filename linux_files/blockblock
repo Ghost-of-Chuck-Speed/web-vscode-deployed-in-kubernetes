@@ -1,0 +1,49 @@
+#### THis is a small ask 
+sudo chsh -s /usr/sbin/nologin user
+
+You can remove terminal access by hiding terminal applications in the application menu. In XFCE, you can do this by modifying .desktop files:
+    Navigate to /usr/share/applications/ or ~/.local/share/applications/.
+    Find and edit the .desktop files for terminal applications (like xfce4-terminal.desktop).
+    Set NoDisplay=true in the file.
+sudo nano /usr/share/applications/xfce4-terminal.desktop
+
+sudo chmod o-x /usr/bin/ssh
+sudo chmod o-x /usr/bin/vim
+sudo chmod o-x /usr/bin/nano
+sudo chmod o-x /bin/cat
+sudo chmod o-x /bin/echo
+sudo chown root:root /home/username/.bashrc
+sudo chown root:root /home/username/.bash_profile
+
+
+sudo ufw deny out to any port 22
+or remove from SG
+/etc/ssh/sshd_config
+DenyUsers username
+
+
+##############
+### Kiosk mode idfk about this  
+##############
+sudo adduser kiosk-user
+# Follow the prompts to set a password for this user.
+
+# Install necessary packages
+sudo apt-get install xfce4-session
+
+# Create a script to start the kiosk application
+sudo bash -c 'cat > /home/kiosk-user/start-kiosk.sh << "EOF"
+#!/bin/bash
+xfce4-panel --quit
+xfdesktop --replace &
+firefox --kiosk http://your-start-page.com
+EOF'
+
+# Make the script executable
+sudo chmod +x /home/kiosk-user/start-kiosk.sh
+
+# Create or edit the .xsession file for the kiosk user
+sudo bash -c 'echo "exec /home/kiosk-user/start-kiosk.sh" > /home/kiosk-user/.xsession'
+
+# Change the shell to nologin for security
+sudo chsh -s /usr/sbin/nologin kiosk-user
