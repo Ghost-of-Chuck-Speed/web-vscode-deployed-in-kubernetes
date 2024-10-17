@@ -1,5 +1,5 @@
 #### THis is a small ask 
-sudo chsh -s /usr/sbin/nologin user
+sudo chsh -s /usr/sbin/nologin user could do group too
 
 You can remove terminal access by hiding terminal applications in the application menu. In XFCE, you can do this by modifying .desktop files:
     Navigate to /usr/share/applications/ or ~/.local/share/applications/.
@@ -12,14 +12,16 @@ sudo chmod o-x /usr/bin/vim
 sudo chmod o-x /usr/bin/nano
 sudo chmod o-x /bin/cat
 sudo chmod o-x /bin/echo
+sudo chmod o-x /usr/bin/tee
+sudo chmod o-x /usr/bin/less
+sudo chmod o-x /usr/bin/more
+sudo chmod o-x /usr/bin/tail
 sudo chown root:root /home/username/.bashrc
 sudo chown root:root /home/username/.bash_profile
-
-
 sudo ufw deny out to any port 22
 or remove from SG
 /etc/ssh/sshd_config
-DenyUsers username
+DenyUsers username probably could do group too
 
 
 ##############
