@@ -1,0 +1,93 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: code-server
+  namespace: {{ .Release.Namespace }}
+spec:
+  serviceName: "code-server"
+  replicas: {{ .Values.developerCount }}
+  selector:
+    matchLabels:
+      app: code-server
+  template:
+    metadata:
+      labels:
+        app: code-server
+    spec:
+      containers:
+      - name: code-server
+        image: {{ .Values.image.repository }}:{{ .Values.image.tag }}
+        ports:
+        - containerPort: 8443
+        env:
+        - name: PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: code-server-secrets
+              key: password
+        volumeMounts:
+        - mountPath: /path/to/developer-storage
+          name: developer-storage
+        - mountPath: /path/to/shared
+          name: shared-storage
+  volumeClaimTemplates:
+  - metadata:
+      name: developer-storage
+    spec:
+      accessModes: [ "ReadWriteOnce" ]
+      resources:
+        requests:
+          storage: {{ .Values.individualStorageSize }}
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: code-server
+  namespace: {{ .Release.Namespace }}
+spec:
+  clusterIP: None
+  selector:
+    app: code-server
+  ports:
+  - port: 80
+    targetPort: 8443
+---
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: code-server-ingress
+  namespace: {{ .Release.Namespace }}
+  annotations:
+    nginx.ingress.kubernetes.io/rewrite-target: /$2
+spec:
+  ingressClassName: nginx
+  rules:
+    {{- range $i := until (int .Values.developerCount) }}
+    - host: "{{ $.Values.nginx.domain }}"
+      http:
+        paths:
+          - path: /developer{{ add $i 1 }}(/|$)(.*)
+            pathType: Prefix
+            backend:
+              service:
+                name: code-server
+                port:
+                  number: 80
+    {{- end }}
+---
+initContainers:
+- name: init-user-config
+  image: busybox
+  command:
+  - sh
+  - -c
+  - |
+    USER_ID=$(echo $HOSTNAME | rev | cut -d'-' -f1 | rev)
+    mkdir -p /home/coder/project/.config
+    echo "bind-addr: 0.0.0.0:8080" > /home/coder/project/.config/code-server.yaml
+    echo "auth: password" >> /home/coder/project/.config/code-server.yaml
+    echo "password: ${PASSWORD}" >> /home/coder/project/.config/code-server.yaml
+    echo "base-path: /developer${USER_ID}" >> /home/coder/project/.config/code-server.yaml
+  volumeMounts:
+  - name: code-server-data
+    mountPath: /home/coder/project
