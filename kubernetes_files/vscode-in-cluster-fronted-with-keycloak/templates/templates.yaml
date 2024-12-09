@@ -20,7 +20,7 @@ spec:
             - containerPort: 8443
           volumeMounts:
             - name: config
-              mountPath: /config
+              mountPath: /workspace
       volumes:
         - name: config
           emptyDir: {}

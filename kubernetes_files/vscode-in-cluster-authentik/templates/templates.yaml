@@ -1,15 +1,30 @@
+# Secrets for SSL Certificates for each developer
+# {{- $devCount := .Values.developerCount | int }}
+# {{- range $i := until $devCount }}
+# apiVersion: v1
+# kind: Secret
+# metadata:
+#   name: code-server-developer{{ add $i 1 }}-tls
+#   namespace: coder
+# type: kubernetes.io/tls
+# data:
+#   tls.crt: ###
+#   tls.key: ###
+# {{- end }}
+
+---
 ---
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: code-server-ingress
-  namespace: {{ .Release.Namespace }}
   annotations:
-     nginx.ingress.kubernetes.io/redirect-path: /
+    nginx.ingress.kubernetes.io/auth-url: "http://authentik-server.{{ .Release.Namespace }}.svc.cluster.local/outpost.goauthentik.io/auth/nginx"
+    nginx.ingress.kubernetes.io/auth-signin: "http://$host/outpost.goauthentik.io/start?rd=$escaped_request_uri"
 spec:
   ingressClassName: nginx
   rules:
-    {{- range $i := until (int .Values.developerCount) }}
+    {{- range $i := until $devCount }}
     - host: "{{ $.Values.nginx.domain }}"
       http:
         paths:
@@ -19,8 +34,43 @@ spec:
               service:
                 name: code-server-developer{{ add $i 1 }}
                 port:
-                  number: 80
+                  number: 8080
     {{- end }}
+    - host: "{{ $.Values.nginx.domain }}"
+      http:
+        paths:
+          - path: /authentik
+            pathType: Prefix
+            backend:
+              service:
+                name: authentik-server
+                port: 
+                  number: 80
+
+### Stock ingress replaced by above 
+# apiVersion: networking.k8s.io/v1
+# kind: Ingress
+# metadata:
+#   name: code-server-ingress
+#   annotations:
+#     # nginx.ingress.kubernetes.io/auth-type: basic
+#     # nginx.ingress.kubernetes.io/auth-secret: your-auth-secret
+#     # nginx.ingress.kubernetes.io/auth-realm: "Protected Area"
+# spec:
+#   ingressClassName: nginx
+#   rules:
+#     {{- range $i := until $devCount }}
+#     - host: "{{ $.Values.nginx.domain }}"  # Use $ to access top-level Values
+#       http:
+#         paths:
+#           - path: /developer{{ add $i 1 }}  # Hard-coded path for each developer
+#             pathType: Prefix
+#             backend:
+#               service:
+#                 name: code-server-developer{{ add $i 1 }}
+#                 port:
+#                   number: 80  # Change to 80 for HTTP traffic
+#     {{- end }}
 
 ---
 # Persistent Volume for Shared Storage
@@ -30,7 +80,7 @@ metadata:
   name: shared-pv
 spec:
   capacity:
-    storage: {{ .Values.sharedStorageSize }}
+    storage: {{ .Values.sharedStorageSize }} 
   accessModes:
     - ReadWriteMany
   hostPath:
@@ -38,35 +88,36 @@ spec:
 
 ---
 # Persistent Volumes for Developers
-{{- range $i := until (int .Values.developerCount) }}
+{{- range $i := until $devCount }}
 apiVersion: v1
 kind: PersistentVolume
 metadata:
   name: developer{{ add $i 1 }}-pv
 spec:
   capacity:
-    storage: {{ $.Values.individualStorageSize }}
+    storage: {{ $.Values.individualStorageSize }}  # Accessing from top-level scope
   accessModes:
     - ReadWriteOnce
   hostPath:
     path: /mnt/developer{{ add $i 1 }}
 {{- end }}
 
+
 ---
 # Persistent Volume Claims for Developers
-{{- range $i := until (int .Values.developerCount) }}
+{{- range $i := until $devCount }}
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: developer{{ add $i 1 }}-pvc
-  namespace: {{ $.Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteOnce
   resources:
     requests:
-      storage: {{ $.Values.individualStorageSize }}
+      storage: {{ $.Values.individualStorageSize }}  # Accessing from top-level scope
 {{- end }}
+
 
 ---
 # Persistent Volume Claims for Shared Storage
@@ -74,22 +125,20 @@ apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
   name: shared-pvc
-  namespace: {{ .Release.Namespace }}
 spec:
   accessModes:
     - ReadWriteMany
   resources:
     requests:
-      storage: {{ .Values.sharedStorageSize }}
+      storage: {{ .Values.sharedStorageSize }} 
 
 ---
 # Deployments and Services for Each Developer
-{{- range $i := until (int .Values.developerCount) }}
+{{- range $i := until $devCount }}
 apiVersion: apps/v1
 kind: Deployment
 metadata:
   name: code-server-developer{{ add $i 1 }}
-  namespace: {{ $.Release.Namespace }}
 spec:
   replicas: 1
   selector:
@@ -102,7 +151,7 @@ spec:
     spec:
       containers:
       - name: code-server
-        image: {{ $.Values.image.repository }}:{{ $.Values.image.tag }}
+        image: {{ $.Values.image.repository }}:{{ $.Values.image.tag }}  # Updated to use top-level scope
         ports:
         - containerPort: 8443
         env:
@@ -120,13 +169,12 @@ spec:
       - name: shared-storage
         persistentVolumeClaim:
           claimName: shared-pvc
-
+      
 ---
 apiVersion: v1
 kind: Service
 metadata:
   name: code-server-developer{{ add $i 1 }}
-  namespace: {{ $.Release.Namespace }}
 spec:
   type: ClusterIP
   ports:

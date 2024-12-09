@@ -1,0 +1,6 @@
+# Chart.yaml
+apiVersion: v2
+name: authentik-vscode
+description: A Helm chart for multiple developer environments using code-server, authentik and NGINX
+version: 0.1.0
+appVersion: "1.0"

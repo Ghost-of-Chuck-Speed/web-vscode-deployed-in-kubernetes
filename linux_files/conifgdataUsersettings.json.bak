@@ -1,0 +1,31 @@
+{
+  "workbench.startupEditor": "welcomePage",
+  "workbench.welcomePage.customSections": [
+    {
+      "id": "custom-banner",
+      "title": "Machine Identifier",
+      "content": [
+        {
+          "type": "text",
+          "text": "You are currently on: [MACHINE NAME]"
+        }
+      ]
+    },
+    {
+      "id": "important-info",
+      "title": "Important Information",
+      "content": [
+        {
+          "type": "text",
+          "text": "BLAH BLAH YES NO 123: http://example.com"
+        }
+      ]
+    }
+  ],
+  "workbench.preferredHighContrastLightColorTheme": "One Dark Pro",
+  "workbench.colorTheme": "One Dark Pro",
+  "git.autofetch": true,
+  "emmet.preferences": {},
+  "window.title": "[MACHINE NAME]",
+  "window.commandCenter": false
+}

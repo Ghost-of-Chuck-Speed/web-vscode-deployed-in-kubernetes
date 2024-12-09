@@ -4,3 +4,7 @@
 #cat cert.key | base64 | tr -d '\n' > private.key
 # kubectl create secret tls code-server-tls --cert=public.crt --key=private.key
 #helm install <release> ./<path-to-chart> --namespace coder --create-namespace
+helm upgrade authentik authent
+ik/authentik -n code-dev   -f ./vscode-in-cluster-authentik/authentik-values-filled.yaml   --set global.postgresql.auth.p
+assword=$PASSWORD   --set postgresql.auth.password=$PASSWORD
+helm upgrade vscode-dev ./vscode-in-cluster-authentik --namespace code-dev

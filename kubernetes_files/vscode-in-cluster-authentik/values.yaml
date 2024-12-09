@@ -1,13 +1,19 @@
 # values.yaml
----
 nginx:
-  domain: "coder.dev"
+  domain: "vscode.local"
 
 developerCount: 2
 
 developerNames:
   - chuck
   - bob
+  # - alice
+
+# Secrets for each developer
+developerSecrets:
+  - secret-chuck-tls
+  - secret-alice-tls
+  # - secret-bob-tls
 
 individualStorageSize: 5Gi
 sharedStorageSize: 5Gi
